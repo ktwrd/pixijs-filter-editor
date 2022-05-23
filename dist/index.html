@@ -1,0 +1,54 @@
+<link href="style.css" type="text/css" rel="stylesheet" />
+<div id="aceEditor_Vertex">
+    
+</div>
+<div id="aceEditor_Fragment">
+varying vec2 vTextureCoord;
+uniform sampler2D uSampler;
+uniform float boundingMaxX;
+uniform float boundingMaxY;
+uniform float boundingMaxZ;
+uniform float boundingMinX;
+uniform float boundingMinY;
+uniform float boundingMinZ;
+uniform float imageMax;
+uniform float imageMin;
+vec3 packFloatInto8BitVec3(float v, float min, float max) {
+    float zeroToOne = (v - min) / (max - min);
+    return vec3(zeroToOne, zeroToOne, zeroToOne);
+}
+float unpack8BitVec4IntoFloat(vec4 v) {
+    float partOne = 0.0;
+    partOne += v.r * 256.0;
+    partOne += v.g * 256.0;
+    partOne += v.b * 256.0;
+    partOne += v.a * 256.0;
+    return 256.0 * 4.0 / partOne;
+}
+
+float unpack8BitVec3IntoFloat(vec3 v, float min, float max) {
+    float partOne = v.r * 256.0 + v.g * 256.0 + v.b * 256.0;
+    float partTwo = partOne / (256.0 * 3.0);
+    return (partTwo * (max - min) + min);
+}
+
+void main()
+{
+    vec4 color = texture2D(uSampler, vTextureCoord);
+    vec4 newColor = vec4(0.0, 0.0, 0.0, 1.0);
+    float floor = 1.0 / 255.0;
+    if (color.r > floor)
+    {
+        float scale = unpack8BitVec4IntoFloat(color);
+        newColor = vec4(scale, scale, scale, 1.0);
+    }
+
+    gl_FragColor = newColor;
+}
+</div>
+
+<div id="pixiViewport">
+
+</div>
+
+<script type="text/javascript" src="main.js"></script>
